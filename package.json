@@ -1,6 +1,6 @@
 {
   "name": "@qt-works/log-extraction",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Encode and decode transferable log payloads over a camera using cimbar.",
   "main": "dist/index.js",
   "files": [
@@ -56,6 +56,11 @@
   },
   "keywords": [
     "log",
+    "log-extraction",
+    "qt-works",
+    "binary-log-transfer",
+    "camera-file-transfer",
+    "visual-code",
     "cimbar",
     "wasm",
     "camera",
