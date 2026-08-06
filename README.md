@@ -6,6 +6,8 @@
 
 The package is useful when a device can show a screen but cannot easily upload logs through a network connection.
 
+For bug reports and feature requests, please [submit an issue](https://github.com/qt-works/log-extraction/issues/new).
+
 ## Features
 
 - Encode a `File` into cimbar frames rendered on a `<canvas>`.
