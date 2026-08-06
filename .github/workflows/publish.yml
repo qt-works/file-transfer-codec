@@ -1,0 +1,35 @@
+name: Publish Package to npm
+
+on:
+  push:
+    tags:
+      - "v*" # 只要推送格式如 v1.0.0 的 Tag 就会触发发布
+
+permissions:
+  contents: read
+  id-token: write # 必须：开启 OIDC 鉴权权限
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build --if-present
+
+      - name: Run Tests
+        run: npm test --if-present
+
+      - name: Publish to npm
+        run: npm publish
