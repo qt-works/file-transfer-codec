@@ -3,11 +3,12 @@ name: Publish Package to npm
 on:
   push:
     tags:
-      - "v*" # 只要推送格式如 v1.0.0 的 Tag 就会触发发布
+      - "v*" # 当推送格式如 v1.0.0 的 Tag 时触发
+  workflow_dispatch: # 开启 GitHub 网页端手动触发按钮（可选）
 
 permissions:
   contents: read
-  id-token: write # 必须：开启 OIDC 鉴权权限
+  id-token: write # 支持 --provenance 签名鉴权
 
 jobs:
   publish:
@@ -22,14 +23,20 @@ jobs:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
 
+      # 1. 先安装依赖
       - name: Install Dependencies
         run: npm ci
 
+      # 2. 编译打包构建（如 TypeScript 编译）
       - name: Build
         run: npm run build --if-present
 
+      # 3. 运行单元测试
       - name: Run Tests
         run: npm test --if-present
 
+      # 4. 最后执行发布到 npm
       - name: Publish to npm
-        run: npm publish
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
