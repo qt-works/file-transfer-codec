@@ -1,0 +1,85 @@
+{
+  "name": "@qt-works/log-extraction",
+  "version": "1.0.0",
+  "description": "Encode and decode transferable log payloads over a camera using cimbar.",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md",
+    "libcimbar/LICENSE",
+    "libcimbar/src/third_party_lib/base91/LICENSE",
+    "libcimbar/src/third_party_lib/concurrentqueue/LICENSE.md",
+    "libcimbar/src/third_party_lib/cxxopts/LICENSE",
+    "libcimbar/src/third_party_lib/fmt/LICENSE.rst",
+    "libcimbar/src/third_party_lib/intx/LICENSE",
+    "libcimbar/src/third_party_lib/libcorrect/LICENSE",
+    "libcimbar/src/third_party_lib/libpopcnt/LICENSE",
+    "libcimbar/src/third_party_lib/PicoSHA2/LICENSE",
+    "libcimbar/src/third_party_lib/stb/LICENSE",
+    "libcimbar/src/third_party_lib/wirehair/LICENSE",
+    "libcimbar/src/third_party_lib/zstd/COPYING",
+    "libcimbar/src/third_party_lib/zstd/LICENSE",
+    "libcimbar/opencv4/COPYRIGHT",
+    "libcimbar/opencv4/LICENSE",
+    "libcimbar/opencv4/3rdparty/cpufeatures/LICENSE",
+    "libcimbar/opencv4/3rdparty/ffmpeg/license.txt",
+    "libcimbar/opencv4/3rdparty/flatbuffers/LICENSE.txt",
+    "libcimbar/opencv4/3rdparty/include/opencl/LICENSE.txt",
+    "libcimbar/opencv4/3rdparty/ittnotify/src/ittnotify/LICENSE.BSD",
+    "libcimbar/opencv4/3rdparty/ittnotify/src/ittnotify/LICENSE.GPL",
+    "libcimbar/opencv4/3rdparty/libjasper/copyright",
+    "libcimbar/opencv4/3rdparty/libjasper/LICENSE",
+    "libcimbar/opencv4/3rdparty/libjpeg-turbo/LICENSE.md",
+    "libcimbar/opencv4/3rdparty/libpng/LICENSE",
+    "libcimbar/opencv4/3rdparty/libspng/LICENSE",
+    "libcimbar/opencv4/3rdparty/libtiff/COPYRIGHT",
+    "libcimbar/opencv4/3rdparty/libwebp/COPYING",
+    "libcimbar/opencv4/3rdparty/openexr/LICENSE",
+    "libcimbar/opencv4/3rdparty/openjpeg/LICENSE",
+    "libcimbar/opencv4/3rdparty/protobuf/LICENSE",
+    "libcimbar/opencv4/3rdparty/quirc/LICENSE",
+    "libcimbar/opencv4/3rdparty/zlib/LICENSE",
+    "libcimbar/opencv4/3rdparty/zlib-ng/LICENSE.md",
+    "libcimbar/opencv4/modules/core/3rdparty/SoftFloat/COPYING.txt",
+    "libcimbar/opencv4/modules/dnn/src/torch/COPYRIGHT.txt",
+    "libcimbar/opencv4/modules/gapi/src/3rdparty/vasot/LICENSE.txt",
+    "libcimbar/opencv4/modules/highgui/src/files_Qt/Material/LICENSE"
+  ],
+  "types": "./dist/types/index.d.ts",
+  "scripts": {
+    "build-lib": "rimraf dist && node ./build/lib.js",
+    "build": "npm run build-lib && tsc",
+    "prepack": "npm run build"
+  },
+  "keywords": [
+    "log",
+    "cimbar",
+    "wasm",
+    "camera",
+    "decoder",
+    "encoder"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qt-works/log-extraction.git"
+  },
+  "bugs": {
+    "url": "https://github.com/qt-works/log-extraction/issues"
+  },
+  "homepage": "https://github.com/qt-works/log-extraction#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "esbuild-plugin-copy": "^2.1.1",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.3"
+  },
+  "type": "module"
+}

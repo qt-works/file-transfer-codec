@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "dist/types",
+    "skipLibCheck": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "target": "ES2017",
+    "lib": ["ESNext", "DOM"]
+  },
+  "include": ["src/lib"],
+  "exclude": ["src/lib/wasm/**/*.js"]
+}

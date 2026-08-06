@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cimbar Image Processing with FS</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .left-panel,
+    .right-panel {
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .left-panel {
+      flex: 2;
+      border-right: 1px solid #ccc;
+    }
+
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #dropZone {
+      width: 100%;
+      min-height: 200px;
+      border: 3px dashed #ccc;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    #dropZone.dragover {
+      background-color: #e1f5fe;
+      border-color: #2196f3;
+    }
+
+    #imageContainer {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .image-wrapper {
+      position: relative;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .image-wrapper img {
+      width: 100%;
+      height: auto;
+      max-height: 200px;
+      object-fit: contain;
+    }
+
+    .image-wrapper .remove-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(255, 0, 0, 0.7);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #processButton {
+      padding: 15px 30px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    #processButton:hover {
+      background-color: #45a049;
+    }
+
+    #processButton:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    #resultContainer {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .loading {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="left-panel">
+    <h2>Upload Images</h2>
+    <div id="dropZone">
+      Drop images here or click to select
+      <input type="file" id="fileInput" multiple accept="image/*" style="display: none">
+    </div>
+    <div id="imageContainer"></div>
+  </div>
+
+  <div class="right-panel">
+    <h2>Decode Images</h2>
+    <button id="processButton" disabled>Decode with Cimbar</button>
+    <div id="resultContainer"></div>
+    <textarea style="width: 100%; height: 100%; resize: none; border: none;" id="decodeContent">
+    </textarea>
+  </div>
+
+  <div class="loading" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <script type="text/javascript">
+    var Module = {};
+
+    Module.onRuntimeInitialized = () => {
+      console.log("onRuntimeInitialized");
+    };
+    let uploadedImages = [];
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const imageContainer = document.getElementById('imageContainer');
+    const processButton = document.getElementById('processButton');
+    const resultContainer = document.getElementById('resultContainer');
+    const outputDiv = document.getElementById('decodeContent');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    // 文件拖拽处理
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    // 点击上传处理
+    dropZone.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+
+    // 处理上传的文件
+    async function handleFiles(files) {
+      clearDir("/input/");
+      for (let file of Array.from(files)) {
+        if (file.type.startsWith('image/')) {
+          try {
+            const imageData = {
+              id: Date.now() + Math.random(),
+              file: file,
+              name: file.name,
+              fsPath: `/input/${file.name}`
+            };
+
+            // 读取文件内容
+            const arrayBuffer = await file.arrayBuffer();
+            const uint8Array = new Uint8Array(arrayBuffer);
+
+            // 保存到FS
+            FS.writeFile(imageData.fsPath, uint8Array);
+
+            // 创建预览
+            const dataUrl = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onload = (e) => resolve(e.target.result);
+              reader.readAsDataURL(file);
+            });
+
+            imageData.dataUrl = dataUrl;
+            uploadedImages.push(imageData);
+            addImageToContainer(imageData);
+            updateProcessButton();
+          } catch (error) {
+            console.error('Error handling file:', error);
+            alert(`Error handling file ${file.name}: ${error.message}`);
+          }
+        }
+      }
+    }
+
+    function clearDir(dir) {
+      if (FS.isDir(dir)) {
+        // clear dir
+        const fileList = FS.readdir(dir);
+        for (const filename of fileList) {
+          if (filename != '.' && filename != '..') {
+            console.log("rm file " + dir + '/' + filename);
+            FS.unlink(dir + '/' + filename);
+          }
+        }
+      } else {
+        // create dir
+        console.log("create dir " + dir);
+        FS.mkdir(dir);
+      }
+    }
+
+    // 添加图片到容器
+    function addImageToContainer(imageData) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'image-wrapper';
+      wrapper.dataset.id = imageData.id;
+
+      const img = document.createElement('img');
+      img.src = imageData.dataUrl;
+      img.alt = imageData.name;
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.innerHTML = '×';
+      removeBtn.onclick = () => removeImage(imageData.id);
+
+      wrapper.appendChild(img);
+      wrapper.appendChild(removeBtn);
+      imageContainer.appendChild(wrapper);
+    }
+
+    // 移除图片
+    function removeImage(id) {
+      const imageData = uploadedImages.find(img => img.id === id);
+      if (imageData) {
+        try {
+          // 从FS中删除文件
+          FS.unlink(imageData.fsPath);
+        } catch (error) {
+          console.error('Error removing file from FS:', error);
+        }
+      }
+
+      uploadedImages = uploadedImages.filter(img => img.id !== id);
+      const wrapper = document.querySelector(`.image-wrapper[data-id="${id}"]`);
+      if (wrapper) {
+        wrapper.remove();
+      }
+      updateProcessButton();
+    }
+
+    // 更新处理按钮状态
+    function updateProcessButton() {
+      processButton.disabled = uploadedImages.length === 0;
+    }
+
+    // 处理图片
+    async function decodeImages() {
+      if (!Module) {
+        alert('Cimbar module is not loaded yet. Please try again in a moment.');
+        return;
+      }
+
+      loadingOverlay.style.display = 'flex';
+      resultContainer.innerHTML = '';
+
+
+      try {
+        // prepare output directory
+        const out_dir = "/out/";
+        clearDir(out_dir);
+
+        // prepare wasm parameter
+        const numBytes = 32;
+        const dataPtr = Module._malloc(numBytes);
+        const dataOnHeap = new Uint8Array(Module.HEAPU8.buffer, dataPtr, numBytes);
+        dataOnHeap.fill(0);
+        in_file_path = "/input/*.png";
+        for (let i = 0; i < in_file_path.length; i++) {
+          dataOnHeap[i] = in_file_path.charCodeAt(i);
+        }
+
+        const outPtr = Module._malloc(numBytes);
+        const outOnHeap = new Uint8Array(Module.HEAPU8.buffer, outPtr, numBytes);
+        outOnHeap.fill(0);
+        for (let i = 0; i < out_dir.length; i++) {
+          outOnHeap[i] = out_dir.charCodeAt(i);
+        }
+
+        // call wasm function
+        console.log('Module._decode in: ' + dataOnHeap.byteOffset + ' len: ' + numBytes + ', out: ' + outOnHeap.byteOffset + ', len: ' + numBytes);
+        var res = Module._decode(dataOnHeap.byteOffset, numBytes, outOnHeap.byteOffset, numBytes);
+        console.log('Module._decode res: ' + res);
+        if (res == 0) {
+          const fileList = FS.readdir(out_dir);
+          var contents = 'Error: failed to decode!';
+          for (const filename of fileList) {
+            if (filename != '.' && filename != '..') {
+              console.log('decode output file: ' + filename);
+
+              // read output file
+              contents = FS.readFile(out_dir + '/' + filename, { encoding: 'utf8' });
+            }
+          }
+          outputDiv.textContent = contents;
+        }
+
+        Module._free(dataPtr);
+        Module._free(outPtr);
+      } catch (error) {
+        console.error('Error processing image:', error);
+        const errorDiv = document.createElement('div');
+        errorDiv.style.color = 'red';
+        errorDiv.textContent = `Error processing ${imageData.name}: ${error.message}`;
+        resultContainer.appendChild(errorDiv);
+      } finally {
+        loadingOverlay.style.display = 'none';
+      }
+    }
+
+    processButton.addEventListener('click', decodeImages);
+  </script>
+  <script src="cimbar_js.js"></script>
+</body>
+
+</html>
