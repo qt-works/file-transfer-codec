@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="intro">
+      <div class="eyebrow">
+        <span class="eyebrow-mark"></span>FILE TRANSFER CODEC / DEMO
+      </div>
+      <p class="intro-copy">
+        浏览器打开后会自动生成固定内容 `hello world`
+        的编码画面。无需输入和摄像头，直接把屏幕展示给另一台设备。
+      </p>
+    </header>
+
+    <main class="workspace" aria-label="文件编码工具">
+      <section class="tool-panel" aria-labelledby="encode-title">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">01 / AUTO ENCODE</span>
+            <h2 id="encode-title">直接生成</h2>
+          </div>
+          <span class="format-tag">UTF-8</span>
+        </div>
+        <div class="panel-copy">
+          Demo 页面加载后会直接编码固定内容 `hello
+          world`，并把结果渲染到右侧画布。
+        </div>
+        <div class="status-row" role="status">
+          <span id="status-dot" class="status-dot" data-tone="ready"></span>
+          <div>
+            <strong id="status-text">正在加载 WebAssembly 模块...</strong>
+            <span id="status-detail">请稍候。</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="preview-panel" aria-labelledby="preview-title">
+        <div class="preview-heading">
+          <div>
+            <span class="section-kicker">02 / OUTPUT</span>
+            <h2 id="preview-title">编码画面</h2>
+          </div>
+          <span class="live-tag"><span></span>LIVE</span>
+        </div>
+        <div class="canvas-frame">
+          <canvas
+            id="encode-canvas"
+            width="1040"
+            height="1040"
+            aria-label="编码画面"
+          ></canvas>
+          <div class="canvas-corner corner-top"></div>
+          <div class="canvas-corner corner-bottom"></div>
+        </div>
+        <div class="preview-footer">
+          <span>视觉帧输出</span><span>1040 × 1040 px</span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <span>这个 Demo 仅展示编码结果，不访问摄像头。</span
+      ><span>Powered by libcimbar + WebAssembly</span>
+    </footer>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

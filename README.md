@@ -1,8 +1,8 @@
-# @qt-works/file-transfer-codec
+# file-transfer-codec
 
 [English](README.md) | [简体中文](README-zh_CN.md)
 
-`@qt-works/file-transfer-codec` is a browser library for encoding and decoding files across devices through camera-friendly visual frames. It wraps a WebAssembly build of `libcimbar` and provides JavaScript APIs for encoding files to animated canvas frames and decoding them from a camera stream.
+`@qt-works/file-transfer-codec` is a browser library for **file encoding and file decoding** across devices through camera-friendly visual frames. It wraps a WebAssembly build of `libcimbar` and provides JavaScript APIs for encoding files to animated canvas frames and decoding them from a camera stream.
 
 The package is useful when devices can display and scan a screen but cannot transfer files through a network connection.
 
@@ -23,6 +23,17 @@ npm install @qt-works/file-transfer-codec@latest
 ```
 
 This installs the latest version published to npm.
+
+## Demo
+
+The repository includes an encoding-only browser demo that automatically encodes `helloworld` into visual frames. It does not accept input, access the camera, or decode files.
+
+```bash
+npm run build
+python -m http.server 8080
+```
+
+Open `http://localhost:8080/demo/` in a browser to render the encoded frames immediately.
 
 ## Quick Start: Encode
 
@@ -156,20 +167,98 @@ The build writes library output to `dist`:
 
 ## Contributors
 
-| Contributor | GitHub |
-| ----------- | ------ |
-| promise96319 | [@promise96319](https://github.com/promise96319) |
-| lucassss-li | [@lucassss-li](https://github.com/lucassss-li) |
-| SherCong | [@SherCong](https://github.com/SherCong) |
-| qiuliaolin | [@qiuliaolin](https://github.com/qiuliaolin) |
-| hbche | [@hbche](https://github.com/hbche) |
-| Libra-Lei | [@Libra-Lei](https://github.com/Libra-Lei) |
-| MuZiRuoYi | [@MuZiRuoYi](https://github.com/MuZiRuoYi) |
-| qt-xin | [@qt-xin](https://github.com/qt-xin) |
-| Bxiaoyao | [@Bxiaoyao](https://github.com/Bxiaoyao) |
-| mondayZhyi | [@mondayZhyi](https://github.com/mondayZhyi) |
-| yangyusiya | [@yangyusiya](https://github.com/yangyusiya) |
-| SilenceChen | [@SilenceChen](https://github.com/SilenceChen) |
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/promise96319">
+        <img src="https://github.com/promise96319.png" width="100px" height="100px" alt="promise96319" />
+        <br />
+        <sub><b>promise96319</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/lucassss-li">
+        <img src="https://github.com/lucassss-li.png" width="100px" height="100px" alt="lucassss-li" />
+        <br />
+        <sub><b>lucassss-li</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/SherCong">
+        <img src="https://github.com/SherCong.png" width="100px" height="100px" alt="SherCong" />
+        <br />
+        <sub><b>SherCong</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/qiuliaolin">
+        <img src="https://github.com/qiuliaolin.png" width="100px" height="100px" alt="qiuliaolin" />
+        <br />
+        <sub><b>qiuliaolin</b></sub>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/hbche">
+        <img src="https://github.com/hbche.png" width="100px" height="100px" alt="hbche" />
+        <br />
+        <sub><b>hbche</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Libra-Lei">
+        <img src="https://github.com/Libra-Lei.png" width="100px" height="100px" alt="Libra-Lei" />
+        <br />
+        <sub><b>Libra-Lei</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/MuZiRuoYi">
+        <img src="https://github.com/MuZiRuoYi.png" width="100px" height="100px" alt="MuZiRuoYi" />
+        <br />
+        <sub><b>MuZiRuoYi</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/qt-xin">
+        <img src="https://github.com/qt-xin.png" width="100px" height="100px" alt="qt-xin" />
+        <br />
+        <sub><b>qt-xin</b></sub>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/Bxiaoyao">
+        <img src="https://github.com/Bxiaoyao.png" width="100px" height="100px" alt="Bxiaoyao" />
+        <br />
+        <sub><b>Bxiaoyao</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/mondayZhyi">
+        <img src="https://github.com/mondayZhyi.png" width="100px" height="100px" alt="mondayZhyi" />
+        <br />
+        <sub><b>mondayZhyi</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/yangyusiya">
+        <img src="https://github.com/yangyusiya.png" width="100px" height="100px" alt="yangyusiya" />
+        <br />
+        <sub><b>yangyusiya</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/SilenceChen">
+        <img src="https://github.com/SilenceChen.png" width="100px" height="100px" alt="SilenceChen" />
+        <br />
+        <sub><b>SilenceChen</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
 
 ## License
 

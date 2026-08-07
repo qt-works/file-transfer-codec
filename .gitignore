@@ -3,6 +3,7 @@ libcimbar/opencv4/modules/js/generator/__pycache__/**/*
 libcimbar/opencv4/modules/python/src2/__pycache__/**/*
 libcimbar/build-wasm/**/*
 dist
+demo/main.js
 node_modules
 *.tgz
 npm-debug.log*

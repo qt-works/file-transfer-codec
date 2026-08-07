@@ -1,8 +1,8 @@
-# 跨设备文件编码解码工具
+﻿# 文件编码解码工具
 
 [English](README.md) | 简体中文
 
-`@qt-works/file-transfer-codec` 是一个用于跨设备文件编码和解码的浏览器库。它封装了基于 WebAssembly 构建的 `libcimbar`，提供将文件编码为连续画面，以及从摄像头画面解码还原文件的 JavaScript API。借助屏幕展示和网页扫码，可以在不同设备之间传递文件，而不依赖设备之间的网络连接。
+`@qt-works/file-transfer-codec` 是一个用于文件编码和解码的浏览器库。它封装了基于 WebAssembly 构建的 `libcimbar`，提供将文件编码为连续画面，以及从摄像头画面解码还原文件的 JavaScript API。借助屏幕展示和网页扫码，可以在不同设备之间传递文件，而不依赖设备之间的网络连接。
 
 当设备可以显示屏幕、但不方便通过网络传输文件时，可以使用这个包传输文件或日志。
 
@@ -12,7 +12,7 @@
 
 ### 解决的问题
 
-在隔离网络、内网或其他受限环境中，手机可以扫描电脑屏幕上的错误日志或文件，再将扫描结果交给开发人员进行问题排查。
+在隔离网络、内网或其他受限环境中，通过手机（网页扫码方式）可以扫描电脑屏幕上的错误日志或文件，再将扫描结果交给开发人员进行问题排查。
 
 ### 限制
 
@@ -33,6 +33,17 @@ npm install @qt-works/file-transfer-codec@latest
 ```
 
 该命令会安装发布到 npm 的最新版本。
+
+## 简单 Demo
+
+仓库内置了一个仅编码的浏览器 Demo，打开后会自动将 `helloworld` 编码为连续画面，不提供输入框，不调用摄像头，也不执行文件解码。
+
+```bash
+npm run build
+python -m http.server 8080
+```
+
+然后打开 `http://localhost:8080/demo/`，即可直接看到编码画面。
 
 ## 快速开始：编码
 
@@ -166,20 +177,98 @@ npm run build
 
 ## 贡献者
 
-| 贡献者       | GitHub                                           |
-| ------------ | ------------------------------------------------ |
-| promise96319 | [@promise96319](https://github.com/promise96319) |
-| lucassss-li  | [@lucassss-li](https://github.com/lucassss-li)   |
-| SherCong     | [@SherCong](https://github.com/SherCong)         |
-| qiuliaolin   | [@qiuliaolin](https://github.com/qiuliaolin)     |
-| hbche        | [@hbche](https://github.com/hbche)               |
-| Libra-Lei    | [@Libra-Lei](https://github.com/Libra-Lei)       |
-| MuZiRuoYi    | [@MuZiRuoYi](https://github.com/MuZiRuoYi)       |
-| qt-xin       | [@qt-xin](https://github.com/qt-xin)             |
-| Bxiaoyao     | [@Bxiaoyao](https://github.com/Bxiaoyao)         |
-| mondayZhyi   | [@mondayZhyi](https://github.com/mondayZhyi)     |
-| yangyusiya   | [@yangyusiya](https://github.com/yangyusiya)     |
-| SilenceChen  | [@SilenceChen](https://github.com/SilenceChen)   |
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/promise96319">
+        <img src="https://github.com/promise96319.png" width="100px" height="100px" alt="promise96319" />
+        <br />
+        <sub><b>promise96319</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/lucassss-li">
+        <img src="https://github.com/lucassss-li.png" width="100px" height="100px" alt="lucassss-li" />
+        <br />
+        <sub><b>lucassss-li</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/SherCong">
+        <img src="https://github.com/SherCong.png" width="100px" height="100px" alt="SherCong" />
+        <br />
+        <sub><b>SherCong</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/qiuliaolin">
+        <img src="https://github.com/qiuliaolin.png" width="100px" height="100px" alt="qiuliaolin" />
+        <br />
+        <sub><b>qiuliaolin</b></sub>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/hbche">
+        <img src="https://github.com/hbche.png" width="100px" height="100px" alt="hbche" />
+        <br />
+        <sub><b>hbche</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Libra-Lei">
+        <img src="https://github.com/Libra-Lei.png" width="100px" height="100px" alt="Libra-Lei" />
+        <br />
+        <sub><b>Libra-Lei</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/MuZiRuoYi">
+        <img src="https://github.com/MuZiRuoYi.png" width="100px" height="100px" alt="MuZiRuoYi" />
+        <br />
+        <sub><b>MuZiRuoYi</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/qt-xin">
+        <img src="https://github.com/qt-xin.png" width="100px" height="100px" alt="qt-xin" />
+        <br />
+        <sub><b>qt-xin</b></sub>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/Bxiaoyao">
+        <img src="https://github.com/Bxiaoyao.png" width="100px" height="100px" alt="Bxiaoyao" />
+        <br />
+        <sub><b>Bxiaoyao</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/mondayZhyi">
+        <img src="https://github.com/mondayZhyi.png" width="100px" height="100px" alt="mondayZhyi" />
+        <br />
+        <sub><b>mondayZhyi</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/yangyusiya">
+        <img src="https://github.com/yangyusiya.png" width="100px" height="100px" alt="yangyusiya" />
+        <br />
+        <sub><b>yangyusiya</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/SilenceChen">
+        <img src="https://github.com/SilenceChen.png" width="100px" height="100px" alt="SilenceChen" />
+        <br />
+        <sub><b>SilenceChen</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
 
 ## 许可证
 
