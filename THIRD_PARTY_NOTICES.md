@@ -32,7 +32,7 @@ The presence of a directory in the OpenCV source snapshot does not mean that com
 
 ## Source Availability
 
-The WebAssembly files in the npm package are generated from `libcimbar` and the required third-party source. The corresponding source code is available in this repository at <https://github.com/qt-works/log-extraction>. Use the Git tag matching the npm package version when one is available.
+The WebAssembly files in the npm package are generated from `libcimbar` and the required third-party source. The corresponding source code is available in this repository at <https://github.com/qt-works/file-transfer-codec>. Use the Git tag matching the npm package version when one is available.
 
 The npm package includes the project notices, the MPL-2.0 text from `libcimbar/LICENSE`, and preserved license/copyright files from the vendored libcimbar and OpenCV trees. The repository remains the source distribution; the native source tree itself is intentionally not copied into the npm package.
 

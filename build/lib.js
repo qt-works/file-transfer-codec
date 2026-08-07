@@ -1,17 +1,7 @@
 import * as esbuild from 'esbuild'
 import copyPlugin from 'esbuild-plugin-copy'
 
-esbuild.build({
-  entryPoints: [
-    {
-      in: './src/lib/index.ts',
-      out: 'index',
-    },
-    {
-      in: './src/lib/worker/worker.js',
-      out: 'worker',
-    },
-  ],
+const sharedOptions = {
   bundle: true,
   minify: true,
   platform: 'neutral',
@@ -20,6 +10,12 @@ esbuild.build({
   alias: {
     '@lib': './src/lib',
   },
+}
+
+await esbuild.build({
+  ...sharedOptions,
+  entryPoints: [{ in: './src/lib/index.ts', out: 'index' }],
+  format: 'esm',
   plugins: [
     copyPlugin({
       assets: {
@@ -28,4 +24,10 @@ esbuild.build({
       },
     }),
   ],
+})
+
+await esbuild.build({
+  ...sharedOptions,
+  entryPoints: [{ in: './src/lib/worker/worker.js', out: 'worker' }],
+  format: 'iife',
 })

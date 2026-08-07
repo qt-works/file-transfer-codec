@@ -4,6 +4,7 @@ type DecodeCallback = {
   onLoadedVideoMetadata: (size: { width: number; height: number }) => void
   onProgress: (progress: number) => void
   onInitialized: () => void
+  onError?: (error: unknown) => void
 }
 
 export class Decoder {
@@ -39,6 +40,7 @@ export class Decoder {
   onLoadedVideoMetadata: (size: { width: number; height: number }) => void
   onProgress: (progress: number) => void
   onInitialized: () => void
+  onError?: (error: unknown) => void
 
   constructor(
     Cimbar: any,
@@ -48,7 +50,7 @@ export class Decoder {
     workerUrl: string,
     callback: DecodeCallback,
   ) {
-    const { onSuccess, onValidate, onLoadedVideoMetadata, onProgress, onInitialized } = callback
+    const { onSuccess, onValidate, onLoadedVideoMetadata, onProgress, onInitialized, onError } = callback
     this.Cimbar = Cimbar
     this.video = video
     this.canvas = canvas
@@ -60,6 +62,7 @@ export class Decoder {
     this.onLoadedVideoMetadata = onLoadedVideoMetadata
     this.onProgress = onProgress
     this.onInitialized = onInitialized
+    this.onError = onError
 
     this.initWorkDir(this.outputDir)
     this.outputDirHeap = this.createPathHeap(this.outputDir)
@@ -105,6 +108,11 @@ export class Decoder {
   }
 
   startVideoStream() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      const error = new Error('当前浏览器不支持摄像头访问，请使用 HTTPS 或 localhost。')
+      this.onError?.(error)
+      return Promise.reject(error)
+    }
     return (
       navigator.mediaDevices
         // .getDisplayMedia()
@@ -123,6 +131,8 @@ export class Decoder {
         })
         .catch(err => {
           console.error('Error accessing the camera: ' + err)
+          this.onError?.(err)
+          throw err
         })
     )
   }
@@ -162,10 +172,12 @@ export class Decoder {
 
   startScan() {
     this.ctx = this.canvas.getContext('2d', { willReadFrequently: true })!
-    this.startVideoStream().then(() => {
-      this.video.play()
-      this.captureFrame()
-    })
+    this.startVideoStream()
+      .then(() => {
+        this.video.play()
+        this.captureFrame()
+      })
+      .catch(() => undefined)
   }
 
   stopScan() {

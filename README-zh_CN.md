@@ -1,26 +1,29 @@
-﻿# 文件编码解码工具
+# file-transfer-codec
 
-[English](README.md) | 简体中文
+[English](README.md) | [简体中文](README-zh_CN.md)
 
-`@qt-works/file-transfer-codec` 是一个用于文件编码和解码的浏览器库。它封装了基于 WebAssembly 构建的 `libcimbar`，提供将文件编码为连续画面，以及从摄像头画面解码还原文件的 JavaScript API。借助屏幕展示和网页扫码，可以在不同设备之间传递文件，而不依赖设备之间的网络连接。
+`@qt-works/file-transfer-codec` 是一个用于离线屏幕到摄像头文件传输的浏览器和 TypeScript 库。它封装了基于 WebAssembly 构建的 `libcimbar`，提供把文件编码为动态视觉帧，以及从摄像头画面解码还原文件的 JavaScript API。
 
-当设备可以显示屏幕、但不方便通过网络传输文件时，可以使用这个包传输文件或日志。
+## 解决的问题
 
-## 功能概览
+当两个设备都能显示和扫描屏幕，但又不方便或不允许通过网络传文件时，可以使用这个库。
 
-本工具可以将文件编码为连续二维码画面（cimbar 帧），接收方使用网页扫码工具扫描这些画面即可解码还原文件，从而实现跨设备文件传递。
+它适合这些场景：
 
-### 解决的问题
+- 把日志从隔离工作站导出；
+- 把小型二进制文件传到手机上查看；
+- 在受限网络或物理隔离环境中进行定向传递；
+- 用浏览器完成文件交接，而不用安装原生传输软件。
 
-在隔离网络、内网或其他受限环境中，通过手机（网页扫码方式）可以扫描电脑屏幕上的错误日志或文件，再将扫描结果交给开发人员进行问题排查。
+## 应用场景
 
-### 限制
+- 支持人员在工作站上打开日志文件，在浏览器里编码后，用手机扫描把文件发给其他设备。
+- 开发人员需要把内部环境中的小构件导出，但不想打开文件共享服务。
+- 用户想要一种可以在普通网页中完成、并且可逆的摄像头传输路径。
 
-- 单个文件大小上限为 30 MB 左右（文件太大，手机扫码可能导致手机发烫，扫码失败）。
+## 功能
 
-## 核心能力
-
-- 将 `File` 编码为在画布上渲染的 cimbar 帧。
+- 将 `File` 编码为在 `<canvas>` 上渲染的 cimbar 帧。
 - 从摄像头视频流中解码 cimbar 帧。
 - 使用 Web Worker 执行帧解码。
 - 提供 TypeScript 类型声明。
@@ -32,23 +35,29 @@
 npm install @qt-works/file-transfer-codec@latest
 ```
 
-该命令会安装发布到 npm 的最新版本。
+## Demo
 
-## 简单 Demo
-
-仓库内置了一个仅编码的浏览器 Demo，打开后会自动将 `helloworld` 编码为连续画面，不提供输入框，不调用摄像头，也不执行文件解码。
+仓库内置了一个浏览器 Demo，包含“编码”和“扫码”两个模式。
 
 ```bash
-npm run build
-python -m http.server 8080
+npm run dev:demo
 ```
 
-然后打开 `http://localhost:8080/demo/`，即可直接看到编码画面。
+Demo 会在 `http://localhost:5173/` 启动。编码页默认渲染一个示例文件，扫码页会调用摄像头识别帧并下载还原后的文件。
+
+需要构建生产版本时执行 `npm run build-demo`，输出目录为 `demo/dist`。
+
+## 使用限制
+
+- 更适合小到中等大小的文件。接近 30 MB 或更大的文件，在手机上扫码会明显变慢，也更容易失败。
+- 扫码需要稳定的屏幕画面、足够的对比度，以及 HTTPS 或 `localhost` 这样的安全浏览器环境。
+- 这是一个文件传递方案，不是通用同步工具。它比正常网络传输慢，适合定向交接、隔离环境和临时导出场景。
 
 ## 快速开始：编码
 
 ```html
-<input type="file" id="input" /> <canvas id="canvas"></canvas>
+<input type="file" id="input" />
+<canvas id="canvas"></canvas>
 ```
 
 ```js
@@ -96,7 +105,7 @@ Cimbar.onRuntimeInitialized = () => {
     },
     onSuccess: (data) => {
       const blob = new Blob([data], { type: "application/octet-stream" });
-      console.log("decoded log blob:", blob);
+      console.log("decoded file blob:", blob);
     },
     onValidate: (isAligned) => {
       console.log("frame aligned:", isAligned);
@@ -106,6 +115,9 @@ Cimbar.onRuntimeInitialized = () => {
     },
     onLoadedVideoMetadata: ({ width, height }) => {
       console.log("camera size:", width, height);
+    },
+    onError: (error) => {
+      console.error("camera error:", error);
     },
   });
 };
@@ -148,6 +160,7 @@ initCimbar(Cimbar, "/index.wasm");
 - `onValidate(flag)`：报告当前帧是否产生有效数据。
 - `onProgress(progress)`：报告解码进度。
 - `onLoadedVideoMetadata(size)`：报告摄像头视频尺寸。
+- `onError(error)`：报告摄像头访问失败。
 
 ## 开发
 
