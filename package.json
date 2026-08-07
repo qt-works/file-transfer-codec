@@ -1,7 +1,7 @@
 {
   "name": "@qt-works/file-transfer-codec",
-  "version": "1.0.2",
-  "description": "File encoding and file decoding for cross-device transfer using camera-friendly cimbar visual frames.",
+  "version": "1.0.3",
+  "description": "Browser and TypeScript library for offline screen-to-camera file transfer using Cimbar visual frames.",
   "main": "dist/index.js",
   "files": [
     "dist",
@@ -51,51 +51,55 @@
   "types": "./dist/types/index.d.ts",
   "scripts": {
     "build-lib": "rimraf dist && node ./build/lib.js",
-    "build-demo": "node ./build/demo.js",
+    "dev:demo": "npm run build-lib && vite --config demo/vite.config.ts",
+    "build-demo": "vite build --config demo/vite.config.ts",
     "build": "npm run build-lib && tsc && npm run build-demo",
     "prepack": "npm run build"
   },
   "keywords": [
-    "log",
-    "file-transfer-codec",
-    "qt-works",
-    "binary-log-transfer",
-    "camera-file-transfer",
-    "file-encoding",
-    "file-decoding",
-    "encode-file",
-    "decode-file",
-    "cross-device-file-transfer",
+    "file-transfer",
+    "offline-file-transfer",
+    "screen-to-camera",
+    "screen-to-camera-file-transfer",
     "visual-file-transfer",
-    "文件编码",
-    "文件解码",
-    "文件传输",
-    "跨设备传输",
-    "visual-code",
+    "camera-scan",
     "cimbar",
     "wasm",
-    "camera",
+    "webassembly",
+    "browser",
+    "typescript",
+    "encoder",
     "decoder",
-    "encoder"
+    "文件传输",
+    "文件编码",
+    "文件解码",
+    "摄像头扫码"
   ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/qt-works/log-extraction.git"
+    "url": "git+https://github.com/qt-works/file-transfer-codec.git"
   },
   "bugs": {
-    "url": "https://github.com/qt-works/log-extraction/issues"
+    "url": "https://github.com/qt-works/file-transfer-codec/issues"
   },
-  "homepage": "https://github.com/qt-works/log-extraction#readme",
+  "homepage": "https://github.com/qt-works/file-transfer-codec#readme",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^4.3.4",
     "esbuild": "^0.25.0",
     "esbuild-plugin-copy": "^2.1.1",
+    "less": "^4.8.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "rimraf": "^6.0.1",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vite": "^6.3.5"
   },
   "type": "module"
 }

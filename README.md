@@ -2,11 +2,30 @@
 
 [English](README.md) | [简体中文](README-zh_CN.md)
 
-`@qt-works/file-transfer-codec` is a browser library for **file encoding and file decoding** across devices through camera-friendly visual frames. It wraps a WebAssembly build of `libcimbar` and provides JavaScript APIs for encoding files to animated canvas frames and decoding them from a camera stream.
+`@qt-works/file-transfer-codec` is a browser and TypeScript library for offline screen-to-camera file transfer. It wraps a WebAssembly build of `libcimbar` and exposes JavaScript APIs for encoding files into animated visual frames and decoding them back from a camera stream.
 
-The package is useful when devices can display and scan a screen but cannot transfer files through a network connection.
+## What Problem It Solves
 
-For bug reports and feature requests, please [submit an issue](https://github.com/qt-works/log-extraction/issues/new).
+Use this library when two devices can display and scan a screen, but cannot or should not exchange files over a network.
+
+It is a good fit for:
+
+- moving logs off an isolated workstation;
+- transferring a small binary file to a phone for inspection;
+- passing data between machines in a restricted or air-gapped environment;
+- using a browser-only workflow when installing native transfer software is not practical.
+
+## Typical Application Scenarios
+
+- A support engineer opens a log file on a workstation, encodes it in the browser, and scans it with a phone to send it elsewhere.
+- A developer needs to move a small artifact out of an internal environment without opening file-sharing services.
+- A user wants a reversible, camera-based transfer path that works from a regular web page.
+
+## Usage Limitations
+
+- Best suited for small to medium files. Files around 30 MB or larger may become slow or unreliable to scan on a phone.
+- Camera scanning needs a stable screen, enough contrast, and a secure browser context such as HTTPS or `localhost`.
+- This is a transfer workflow, not a general-purpose file sync layer. It is slower than normal network transfer and should be used for targeted handoff scenarios.
 
 ## Features
 
@@ -22,23 +41,23 @@ For bug reports and feature requests, please [submit an issue](https://github.co
 npm install @qt-works/file-transfer-codec@latest
 ```
 
-This installs the latest version published to npm.
-
 ## Demo
 
-The repository includes an encoding-only browser demo that automatically encodes `helloworld` into visual frames. It does not accept input, access the camera, or decode files.
+The repository includes a browser demo with two modes: encoding and camera scan.
 
 ```bash
-npm run build
-python -m http.server 8080
+npm run dev:demo
 ```
 
-Open `http://localhost:8080/demo/` in a browser to render the encoded frames immediately.
+The demo starts on `http://localhost:5173/`. The encode tab renders a sample file by default, and the scan tab uses the camera to decode frames and download the recovered file.
+
+For a production build, run `npm run build-demo`. The output is written to `demo/dist`.
 
 ## Quick Start: Encode
 
 ```html
-<input type="file" id="input" /> <canvas id="canvas"></canvas>
+<input type="file" id="input" />
+<canvas id="canvas"></canvas>
 ```
 
 ```js
@@ -86,7 +105,7 @@ Cimbar.onRuntimeInitialized = () => {
     },
     onSuccess: (data) => {
       const blob = new Blob([data], { type: "application/octet-stream" });
-      console.log("decoded log blob:", blob);
+      console.log("decoded file blob:", blob);
     },
     onValidate: (isAligned) => {
       console.log("frame aligned:", isAligned);
@@ -96,6 +115,9 @@ Cimbar.onRuntimeInitialized = () => {
     },
     onLoadedVideoMetadata: ({ width, height }) => {
       console.log("camera size:", width, height);
+    },
+    onError: (error) => {
+      console.error("camera error:", error);
     },
   });
 };
@@ -138,6 +160,7 @@ Callbacks:
 - `onValidate(flag)` reports whether the current frame produced valid data.
 - `onProgress(progress)` reports decode progress.
 - `onLoadedVideoMetadata(size)` reports the camera frame size.
+- `onError(error)` reports camera access failures.
 
 ## Development
 

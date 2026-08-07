@@ -4,6 +4,7 @@ libcimbar/opencv4/modules/python/src2/__pycache__/**/*
 libcimbar/build-wasm/**/*
 dist
 demo/main.js
+demo/dist
 node_modules
 *.tgz
 npm-debug.log*
