@@ -1,7 +1,7 @@
 {
   "name": "@qt-works/file-transfer-codec",
-  "version": "1.0.1",
-  "description": "Encode and decode files across devices using camera-friendly cimbar frames.",
+  "version": "1.0.2",
+  "description": "File encoding and file decoding for cross-device transfer using camera-friendly cimbar visual frames.",
   "main": "dist/index.js",
   "files": [
     "dist",
@@ -51,7 +51,8 @@
   "types": "./dist/types/index.d.ts",
   "scripts": {
     "build-lib": "rimraf dist && node ./build/lib.js",
-    "build": "npm run build-lib && tsc",
+    "build-demo": "node ./build/demo.js",
+    "build": "npm run build-lib && tsc && npm run build-demo",
     "prepack": "npm run build"
   },
   "keywords": [
@@ -60,6 +61,16 @@
     "qt-works",
     "binary-log-transfer",
     "camera-file-transfer",
+    "file-encoding",
+    "file-decoding",
+    "encode-file",
+    "decode-file",
+    "cross-device-file-transfer",
+    "visual-file-transfer",
+    "文件编码",
+    "文件解码",
+    "文件传输",
+    "跨设备传输",
     "visual-code",
     "cimbar",
     "wasm",

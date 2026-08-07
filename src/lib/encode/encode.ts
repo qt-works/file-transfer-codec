@@ -4,6 +4,8 @@ export class Encoder {
   interval = 66
   isPaused = true
   timeId: any
+  onFirstFrame?: () => void
+  hasRenderedFrame = false
 
   constructor(Cimbar: any, canvas: HTMLCanvasElement | string) {
     this.canvas = typeof canvas === 'string' ? document.querySelector(canvas) : canvas
@@ -29,6 +31,10 @@ export class Encoder {
     let start = performance.now()
     this.Cimbar._render()
     this.Cimbar._next_frame()
+    if (!this.hasRenderedFrame) {
+      this.hasRenderedFrame = true
+      this.onFirstFrame?.()
+    }
     let elapsed = performance.now() - start
     let nextInterval = this.interval > elapsed ? this.interval - elapsed : 0
     this.timeId = setTimeout(() => {
@@ -38,6 +44,7 @@ export class Encoder {
 
   encode(file) {
     this.togglePause(true)
+    this.hasRenderedFrame = false
     const fileReader = new FileReader()
     fileReader.onload = event => {
       const data = new Uint8Array(event.target?.result as ArrayBuffer)
