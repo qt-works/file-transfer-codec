@@ -1,10 +1,10 @@
-# @qt-works/log-extraction
+# @qt-works/file-transfer-codec
 
 [English](README.md) | [简体中文](README-zh_CN.md)
 
-`@qt-works/log-extraction` is a browser library for transferring binary log data through a camera-friendly visual code. It wraps a WebAssembly build of `libcimbar` and provides JavaScript APIs for encoding files to animated canvas frames and decoding them from a camera stream.
+`@qt-works/file-transfer-codec` is a browser library for encoding and decoding files across devices through camera-friendly visual frames. It wraps a WebAssembly build of `libcimbar` and provides JavaScript APIs for encoding files to animated canvas frames and decoding them from a camera stream.
 
-The package is useful when a device can show a screen but cannot easily upload logs through a network connection.
+The package is useful when devices can display and scan a screen but cannot transfer files through a network connection.
 
 For bug reports and feature requests, please [submit an issue](https://github.com/qt-works/log-extraction/issues/new).
 
@@ -19,7 +19,7 @@ For bug reports and feature requests, please [submit an issue](https://github.co
 ## Installation
 
 ```bash
-npm install @qt-works/log-extraction@latest
+npm install @qt-works/file-transfer-codec@latest
 ```
 
 This installs the latest version published to npm.
@@ -31,7 +31,7 @@ This installs the latest version published to npm.
 ```
 
 ```js
-import { Encoder, initCimbar } from "@qt-works/log-extraction";
+import { Encoder, initCimbar } from "@qt-works/file-transfer-codec";
 
 const input = document.getElementById("input");
 const canvas = document.getElementById("canvas");
@@ -60,7 +60,7 @@ initCimbar(Cimbar, "/index.wasm");
 ```
 
 ```js
-import { Decoder, initCimbar } from "@qt-works/log-extraction";
+import { Decoder, initCimbar } from "@qt-works/file-transfer-codec";
 
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
@@ -153,6 +153,23 @@ The build writes library output to `dist`:
 | `src/lib/wasm`   | WebAssembly loader and binary                   |
 | `libcimbar`      | C++ source used to build the WebAssembly binary |
 | `build/lib.js`   | Library build script                            |
+
+## Contributors
+
+| Contributor | GitHub |
+| ----------- | ------ |
+| promise96319 | [@promise96319](https://github.com/promise96319) |
+| lucassss-li | [@lucassss-li](https://github.com/lucassss-li) |
+| SherCong | [@SherCong](https://github.com/SherCong) |
+| qiuliaolin | [@qiuliaolin](https://github.com/qiuliaolin) |
+| hbche | [@hbche](https://github.com/hbche) |
+| Libra-Lei | [@Libra-Lei](https://github.com/Libra-Lei) |
+| MuZiRuoYi | [@MuZiRuoYi](https://github.com/MuZiRuoYi) |
+| qt-xin | [@qt-xin](https://github.com/qt-xin) |
+| Bxiaoyao | [@Bxiaoyao](https://github.com/Bxiaoyao) |
+| mondayZhyi | [@mondayZhyi](https://github.com/mondayZhyi) |
+| yangyusiya | [@yangyusiya](https://github.com/yangyusiya) |
+| SilenceChen | [@SilenceChen](https://github.com/SilenceChen) |
 
 ## License
 
