@@ -1,11 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Decoder, Encoder, initCimbar } from "../../dist/index.js";
+import {
+  Decoder,
+  Encoder,
+  initCimbar,
+  isSupportedCimbarImage,
+} from "../../dist/index.js";
 import "./styles.less";
 
 const SAMPLE_TEXT =
   "Hello from file-transfer-codec. This sample is encoded on screen and can be scanned back from a camera stream.";
 
 type Mode = "encode" | "scan";
+type ScanInput = "camera" | "image";
 type StatusTone = "ready" | "working" | "error";
 type Status = { title: string; detail: string; tone: StatusTone };
 type ScanResult = { data: Uint8Array; size: number };
@@ -44,15 +50,23 @@ export default function App() {
   const [progress, setProgress] = useState(0);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [scanRestart, setScanRestart] = useState(0);
+  const [scanInput, setScanInput] = useState<ScanInput>("camera");
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [imageDragActive, setImageDragActive] = useState(false);
+  const [encodedFrameUrl, setEncodedFrameUrl] = useState<string | null>(null);
   const encoderRef = useRef<Encoder | undefined>(undefined);
   const decoderRef = useRef<Decoder | undefined>(undefined);
+  const pendingImageRef = useRef<File | null>(null);
+  const imagePreviewUrlRef = useRef<string | null>(null);
   const pendingFileRef = useRef<File>(makeSampleFile());
   const encodeCanvasRef = useRef<HTMLCanvasElement>(null);
   const scanVideoRef = useRef<HTMLVideoElement>(null);
   const scanCanvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const encodeFile = (file: File) => {
+    setEncodedFrameUrl(null);
     pendingFileRef.current = file;
     setFileInfo(describeFile(file));
     if (!encoderRef.current) {
@@ -84,6 +98,7 @@ export default function App() {
       try {
         const encoder = new Encoder(Cimbar, canvas);
         encoderRef.current = encoder;
+        encoder.onFrame = setEncodedFrameUrl;
         encoder.onFirstFrame = () => {
           if (disposed) return;
           setEncodeStatus({
@@ -138,7 +153,7 @@ export default function App() {
     setScanResult(null);
     setScanStatus({
       title: "Initializing scanner",
-      detail: "Preparing the camera and the decoder workers.",
+      detail: `Preparing the ${scanInput === "camera" ? "camera and " : ""}decoder workers.`,
       tone: "working",
     });
 
@@ -156,13 +171,35 @@ export default function App() {
           {
             onInitialized: () => {
               if (disposed) return;
-              setScanStatus({
-                title: "Point at the screen",
-                detail:
-                  "Keep the full cimbar frame inside the preview box and the decoder will start scanning automatically.",
-                tone: "ready",
-              });
-              decoder.startScan();
+              if (scanInput === "camera") {
+                setScanStatus({
+                  title: "Point at the screen",
+                  detail:
+                    "Keep the full cimbar frame inside the preview box and the decoder will start scanning automatically.",
+                  tone: "ready",
+                });
+                decoder.startScan();
+                return;
+              }
+
+              setScanStatus(
+                imagePreviewUrlRef.current
+                  ? {
+                      title: "Decoding image",
+                      detail: "The decoder is ready and is processing the selected image.",
+                      tone: "working",
+                    }
+                  : {
+                      title: "Choose a Cimbar image",
+                      detail: "Select or drop a PNG, JPEG, or WebP image to decode it locally.",
+                      tone: "ready",
+                    }
+              );
+              const pendingImage = pendingImageRef.current;
+              if (pendingImage) {
+                pendingImageRef.current = null;
+                decodeImage(decoder, pendingImage);
+              }
             },
             onSuccess: (data: Uint8Array) => {
               if (disposed) return;
@@ -175,12 +212,41 @@ export default function App() {
               });
             },
             onValidate: (valid: boolean) => {
-              if (disposed || !valid) return;
+              if (disposed) return;
+              if (scanInput === "image") {
+                setScanStatus(
+                  valid
+                    ? {
+                        title: "Cimbar frame recognized",
+                        detail:
+                          "The frame is valid. If it belongs to a multi-frame transfer, more frames are required to recover the file.",
+                        tone: "working",
+                      }
+                    : {
+                        title: "No Cimbar frame detected",
+                        detail: "Choose a clear, uncropped Cimbar image and try again.",
+                        tone: "error",
+                      }
+                );
+                return;
+              }
+              if (!valid) return;
               setScanStatus({
                 title: "Recognizing frame",
                 detail: "A valid frame was detected. Keep the screen steady.",
                 tone: "working",
               });
+            },
+            onDecodeError: (code: number) => {
+              if (disposed || scanInput !== "image") return;
+              if (code & 4) {
+                setScanStatus({
+                  title: "Cimbar frame is unreadable",
+                  detail:
+                    "The frame was found, but its payload pixels are damaged. Upload the original 1040 x 1040 PNG instead of a resized screenshot.",
+                  tone: "error",
+                });
+              }
             },
             onProgress: (value: number) => setProgress(value || 0),
             onLoadedVideoMetadata: ({ width, height }) => {
@@ -227,7 +293,57 @@ export default function App() {
       decoderRef.current?.destroy();
       decoderRef.current = undefined;
     };
-  }, [mode, scanRestart]);
+  }, [mode, scanRestart, scanInput]);
+
+  useEffect(
+    () => () => {
+      if (imagePreviewUrlRef.current) {
+        URL.revokeObjectURL(imagePreviewUrlRef.current);
+      }
+    },
+    []
+  );
+
+  const decodeImage = (decoder: Decoder, file: File) => {
+    setProgress(0);
+    setScanResult(null);
+    setScanStatus({
+      title: "Decoding image",
+      detail: `Reading ${file.name} locally.`,
+      tone: "working",
+    });
+    decoder.decodeImage(file).catch(() => undefined);
+  };
+
+  const selectImage = (file: File) => {
+    if (!isSupportedCimbarImage(file)) {
+      setScanStatus({
+        title: "Unsupported image",
+        detail: "Choose a PNG, JPEG, or WebP image.",
+        tone: "error",
+      });
+      return;
+    }
+
+    if (imagePreviewUrlRef.current) {
+      URL.revokeObjectURL(imagePreviewUrlRef.current);
+    }
+    const previewUrl = URL.createObjectURL(file);
+    imagePreviewUrlRef.current = previewUrl;
+    setImagePreviewUrl(previewUrl);
+
+    const decoder = decoderRef.current;
+    if (decoder) {
+      decodeImage(decoder, file);
+    } else {
+      pendingImageRef.current = file;
+      setScanStatus({
+        title: "Preparing decoder",
+        detail: `${file.name} will be decoded when the workers are ready.`,
+        tone: "working",
+      });
+    }
+  };
 
   const handlePickFile = () => fileInputRef.current?.click();
 
@@ -236,6 +352,12 @@ export default function App() {
     event.currentTarget.value = "";
     if (!file) return;
     encodeFile(file);
+  };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = "";
+    if (file) selectImage(file);
   };
 
   const useSampleFile = () => {
@@ -349,7 +471,13 @@ export default function App() {
             </div>
             <div className="preview-footer">
               <span>Visual frame output</span>
-              <span>1040 x 1040 px</span>
+              {encodedFrameUrl ? (
+                <a href={encodedFrameUrl} download="cimbar-frame.png">
+                  Download 1040 x 1040 PNG
+                </a>
+              ) : (
+                <span>1040 x 1040 px</span>
+              )}
             </div>
           </section>
         </main>
@@ -360,32 +488,82 @@ export default function App() {
               <span className="section-kicker">02 / CAMERA SCAN</span>
               <h2>Scan and Decode</h2>
             </div>
-            <span className="live-tag">
-              <span className="live-dot" />
-              CAMERA
-            </span>
+            <div className="scan-input-switch" role="tablist" aria-label="Scan input">
+              <button
+                className={scanInput === "camera" ? "active" : ""}
+                role="tab"
+                aria-selected={scanInput === "camera"}
+                onClick={() => setScanInput("camera")}
+              >
+                Camera
+              </button>
+              <button
+                className={scanInput === "image" ? "active" : ""}
+                role="tab"
+                aria-selected={scanInput === "image"}
+                onClick={() => setScanInput("image")}
+              >
+                Image
+              </button>
+            </div>
           </div>
-          <div className="scan-stage">
+          <div
+            className={`scan-stage ${imageDragActive ? "drag-active" : ""}`}
+            onDragEnter={scanInput === "image" ? (event) => {
+              event.preventDefault();
+              setImageDragActive(true);
+            } : undefined}
+            onDragOver={scanInput === "image" ? (event) => event.preventDefault() : undefined}
+            onDragLeave={scanInput === "image" ? () => setImageDragActive(false) : undefined}
+            onDrop={scanInput === "image" ? (event) => {
+              event.preventDefault();
+              setImageDragActive(false);
+              const file = event.dataTransfer.files?.[0];
+              if (file) selectImage(file);
+            } : undefined}
+          >
             <video
               ref={scanVideoRef}
-              className="scan-video"
+              className={`scan-video ${scanInput === "camera" ? "" : "scan-media-hidden"}`}
               autoPlay
               muted
               playsInline
             />
+            {scanInput === "image" && (imagePreviewUrl ? (
+              <img className="scan-image" src={imagePreviewUrl} alt="Selected Cimbar frame" />
+            ) : (
+              <button className="image-drop-target" onClick={() => imageInputRef.current?.click()}>
+                <strong>Select a Cimbar image</strong>
+                <span>PNG, JPEG, or WebP</span>
+              </button>
+            ))}
             <canvas
               ref={scanCanvasRef}
               className="scan-canvas"
               width={1040}
               height={1040}
             />
-            <div className="scan-mask">
-              <div className="scan-box">
-                <span className="scan-line" />
+            {scanInput === "camera" && (
+              <div className="scan-mask">
+                <div className="scan-box">
+                  <span className="scan-line" />
+                </div>
               </div>
-            </div>
+            )}
             <div className="scan-hint">{scanStatus.detail}</div>
           </div>
+          <input
+            ref={imageInputRef}
+            className="hidden-input"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={handleImageChange}
+          />
+          {scanInput === "image" && imagePreviewUrl && (
+            <button className="choose-image" onClick={() => imageInputRef.current?.click()}>
+              Choose another image
+            </button>
+          )}
           <div className="scan-footer">
             <div className="scan-status">
               <span className={`status-dot ${scanStatus.tone}`} />
@@ -413,9 +591,12 @@ export default function App() {
           )}
           <button
             className="scan-restart"
-            onClick={() => setScanRestart((value) => value + 1)}
+            onClick={() => {
+              pendingImageRef.current = null;
+              setScanRestart((value) => value + 1);
+            }}
           >
-            Restart scan
+            {scanInput === "camera" ? "Restart scan" : "Reset decoder"}
           </button>
         </main>
       )}
@@ -424,7 +605,9 @@ export default function App() {
         <span>
           {mode === "encode"
             ? "This demo only shows encoding output and does not access the camera."
-            : "Scanning requires camera permission. Use HTTPS or localhost."}
+            : scanInput === "camera"
+              ? "Scanning requires camera permission. Use HTTPS or localhost."
+              : "Image decoding runs locally in this browser."}
         </span>
         <span>Powered by libcimbar + WebAssembly</span>
       </footer>

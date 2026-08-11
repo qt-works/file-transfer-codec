@@ -115,6 +115,31 @@ input {
   box-shadow: 0 16px 36px rgba(25, 44, 49, 0.08);
 }
 
+.scan-input-switch {
+  display: flex;
+  padding: 3px;
+  border: 1px solid #607b7d;
+  border-radius: 8px;
+  background: #17282e;
+}
+
+.scan-input-switch button {
+  min-width: 76px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #a9bcba;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.scan-input-switch button.active {
+  background: #8ed2c5;
+  color: #17313a;
+}
+
 .tool-panel {
   width: 40%;
   min-width: 320px;
@@ -323,10 +348,22 @@ canvas {
 }
 
 .preview-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-top: 14px;
   color: #90a7a5;
   font-size: 10px;
   letter-spacing: 0.04em;
+}
+
+.preview-footer a {
+  color: #8ed2c5;
+  text-decoration: none;
+}
+
+.preview-footer a:hover {
+  text-decoration: underline;
 }
 
 .scan-stage {
@@ -334,6 +371,13 @@ canvas {
   overflow: hidden;
   margin-top: 26px;
   background: #0b171b;
+  border: 1px solid transparent;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.scan-stage.drag-active {
+  border-color: #8ed2c5;
+  background: #132f34;
 }
 
 .scan-video {
@@ -342,6 +386,55 @@ canvas {
   height: 540px;
   background: #0b171b;
   object-fit: cover;
+}
+
+.scan-media-hidden {
+  display: none;
+}
+
+.scan-image {
+  display: block;
+  width: 100%;
+  height: 540px;
+  padding: 28px;
+  background: #0b171b;
+  object-fit: contain;
+}
+
+.image-drop-target {
+  display: flex;
+  width: 100%;
+  height: 540px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 1px dashed #607b7d;
+  background: #102127;
+  color: #fff;
+  cursor: pointer;
+}
+
+.image-drop-target strong {
+  font-size: 16px;
+}
+
+.image-drop-target span {
+  margin-top: 8px;
+  color: #90a7a5;
+  font-size: 12px;
+}
+
+.choose-image {
+  display: block;
+  margin: 14px 0 0 auto;
+  padding: 8px 12px;
+  border: 1px solid #607b7d;
+  border-radius: 6px;
+  background: transparent;
+  color: #c7d7d4;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .scan-canvas {
@@ -538,6 +631,21 @@ canvas {
 
   .scan-video {
     height: 420px;
+  }
+
+  .scan-image,
+  .image-drop-target {
+    height: 420px;
+  }
+
+  .scan-heading {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .scan-input-switch button {
+    min-width: 64px;
+    padding: 8px 10px;
   }
 
   .scan-footer {

@@ -1,4 +1,4 @@
-import { Decoder } from './decoder.js'
+import { copyRgbaToBgra, Decoder } from './decoder.js'
 import { initCimbar } from '@lib/wasm/cimbar_js'
 
 var Cimbar = {}
@@ -6,7 +6,7 @@ let decoder
 
 Cimbar.onRuntimeInitialized = () => {
   decoder = new Decoder(Cimbar, result => {
-    result
+    result && !result.errorCode
       ? self.postMessage(
           result,
           result.map(item => item.buffer),
@@ -27,7 +27,8 @@ self.addEventListener('message', e => {
     case 'DATA':
       const { data, width, height } = payload
       const wasmMemory = Cimbar._malloc(data.length)
-      Cimbar.HEAPU8.set(data, wasmMemory)
+      const wasmPixels = new Uint8Array(Cimbar.HEAPU8.buffer, wasmMemory, data.length)
+      copyRgbaToBgra(data, wasmPixels)
       decoder.decode(wasmMemory, width, height)
       Cimbar._free(wasmMemory)
       break
