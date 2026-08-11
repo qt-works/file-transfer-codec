@@ -1,3 +1,12 @@
+export function copyRgbaToBgra(source, destination) {
+  for (let offset = 0; offset < source.length; offset += 4) {
+    destination[offset] = source[offset + 2]
+    destination[offset + 1] = source[offset + 1]
+    destination[offset + 2] = source[offset]
+    destination[offset + 3] = source[offset + 3]
+  }
+}
+
 export class Decoder {
   constructor(Cimbar, onComplete) {
     this.Cimbar = Cimbar
@@ -41,7 +50,7 @@ export class Decoder {
     const res = this.Cimbar._decodeImage(frame, width, height, this.outputHeap.byteOffset, this.numBytes)
 
     if (res !== 0) {
-      if (this.onComplete) this.onComplete(false)
+      if (this.onComplete) this.onComplete({ errorCode: res })
       return
     }
 

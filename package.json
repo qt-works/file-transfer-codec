@@ -51,6 +51,7 @@
   "types": "./dist/types/index.d.ts",
   "scripts": {
     "build-lib": "rimraf dist && node ./build/lib.js",
+    "test": "npm run build-lib && node --test test/*.test.mjs",
     "dev:demo": "npm run build-lib && vite --config demo/vite.config.ts",
     "build-demo": "vite build --config demo/vite.config.ts",
     "build": "npm run build-lib && tsc && npm run build-demo",

@@ -5,6 +5,13 @@ type DecodeCallback = {
   onProgress: (progress: number) => void
   onInitialized: () => void
   onError?: (error: unknown) => void
+  onDecodeError?: (code: number) => void
+}
+
+const SUPPORTED_CIMBAR_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp']
+
+export function isSupportedCimbarImage(file: Blob) {
+  return SUPPORTED_CIMBAR_IMAGE_TYPES.includes(file.type)
 }
 
 export class Decoder {
@@ -34,6 +41,8 @@ export class Decoder {
   workerCount = 4
   workers: Array<{ worker: Worker; decoding: boolean; ready: boolean }> = []
   workersReady = false
+  workersReadyPromise: Promise<void>
+  resolveWorkersReady: () => void
 
   onSuccess: (data: any) => void
   onValidate: (flag: boolean) => void
@@ -41,6 +50,7 @@ export class Decoder {
   onProgress: (progress: number) => void
   onInitialized: () => void
   onError?: (error: unknown) => void
+  onDecodeError?: (code: number) => void
 
   constructor(
     Cimbar: any,
@@ -50,7 +60,7 @@ export class Decoder {
     workerUrl: string,
     callback: DecodeCallback,
   ) {
-    const { onSuccess, onValidate, onLoadedVideoMetadata, onProgress, onInitialized, onError } = callback
+    const { onSuccess, onValidate, onLoadedVideoMetadata, onProgress, onInitialized, onError, onDecodeError } = callback
     this.Cimbar = Cimbar
     this.video = video
     this.canvas = canvas
@@ -63,6 +73,11 @@ export class Decoder {
     this.onProgress = onProgress
     this.onInitialized = onInitialized
     this.onError = onError
+    this.onDecodeError = onDecodeError
+
+    this.workersReadyPromise = new Promise(resolve => {
+      this.resolveWorkersReady = resolve
+    })
 
     this.initWorkDir(this.outputDir)
     this.outputDirHeap = this.createPathHeap(this.outputDir)
@@ -91,14 +106,19 @@ export class Decoder {
           workerRecord.ready = true
           if (this.workers.every(worker => worker.ready)) {
             this.workersReady = true
+            this.resolveWorkersReady()
             this.onInitialized?.()
           }
           return
         }
 
         const data = e.data
-        if (!data) {
+        if (!data || data.errorCode) {
           this.onValidate?.(false)
+          if (data?.errorCode) {
+            console.error(`Cimbar image decode failed with code ${data.errorCode}`)
+            this.onDecodeError?.(data.errorCode)
+          }
         } else {
           this.onValidate?.(true)
           this.writeData(e.data)
@@ -142,6 +162,49 @@ export class Decoder {
     if (!idleWorker) return
     idleWorker.decoding = true
     idleWorker.worker.postMessage({ type: 'DATA', payload: imageData })
+  }
+
+  async decodeImage(file: Blob): Promise<void> {
+    if (!isSupportedCimbarImage(file)) {
+      const error = new Error(`Unsupported image type: ${file.type || 'unknown'}`)
+      this.onError?.(error)
+      throw error
+    }
+
+    await this.workersReadyPromise
+
+    const objectUrl = URL.createObjectURL(file)
+
+    return new Promise((resolve, reject) => {
+      const image = new Image()
+
+      const fail = (error: unknown) => {
+        const normalizedError = error instanceof Error ? error : new Error(String(error))
+        URL.revokeObjectURL(objectUrl)
+        this.onError?.(normalizedError)
+        reject(normalizedError)
+      }
+
+      image.onload = () => {
+        try {
+          this.canvas.width = image.naturalWidth
+          this.canvas.height = image.naturalHeight
+          this.ctx = this.canvas.getContext('2d', { willReadFrequently: true })!
+          this.ctx.drawImage(image, 0, 0)
+          this.decode(this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height))
+          resolve()
+        } catch (error) {
+          const normalizedError = error instanceof Error ? error : new Error(String(error))
+          this.onError?.(normalizedError)
+          reject(normalizedError)
+        } finally {
+          URL.revokeObjectURL(objectUrl)
+        }
+      }
+
+      image.onerror = () => fail(new Error('Unable to load image'))
+      image.src = objectUrl
+    })
   }
 
   writeData(data) {

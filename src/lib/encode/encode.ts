@@ -5,6 +5,7 @@ export class Encoder {
   isPaused = true
   timeId: any
   onFirstFrame?: () => void
+  onFrame?: (dataUrl: string) => void
   hasRenderedFrame = false
 
   constructor(Cimbar: any, canvas: HTMLCanvasElement | string) {
@@ -29,10 +30,11 @@ export class Encoder {
   _nextFrame() {
     if (this.isPaused) return
     let start = performance.now()
-    this.Cimbar._render()
+    const rendered = this.Cimbar._render()
     this.Cimbar._next_frame()
-    if (!this.hasRenderedFrame) {
+    if (rendered > 0 && !this.hasRenderedFrame) {
       this.hasRenderedFrame = true
+      this.onFrame?.(captureFrameDataUrl(this.canvas))
       this.onFirstFrame?.()
     }
     let elapsed = performance.now() - start
@@ -72,4 +74,8 @@ export class Encoder {
   destroy() {
     clearTimeout(this.timeId)
   }
+}
+
+export function captureFrameDataUrl(canvas: Pick<HTMLCanvasElement, 'toDataURL'>) {
+  return canvas.toDataURL('image/png')
 }
