@@ -1,6 +1,6 @@
 {
   "name": "@qt-works/file-transfer-codec",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Browser and TypeScript library for offline screen-to-camera file transfer using Cimbar visual frames.",
   "main": "dist/index.js",
   "files": [
